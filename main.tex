@@ -90,6 +90,8 @@
 % have to be run twice to clear warning/error messages.
 
 
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,decorations,decorations.text,backgrounds,arrows,shapes,intersections,calc,hobby}
 
 
 
@@ -608,13 +610,166 @@ It has been shown in [] that \Cref{eq:discretemumfordshah} is submodular and hen
 \end{equation}
 
 \section{Chan-Vese Parameter Estimation for Graph-Cuts}
-\blindtext
+In this section we introduce the proposed method for Chan-Vese parameter estimation for graph-cuts. Previous parameter estimation schemes focussed on a certain genre of images or image characteristics, and these resulted in a set of hard-coded parameter settings. These hard-coded parameters are not very useful in producing consistent reults in the greater applications of image segmentation even within the fields for which they were optimised.
+
+We devise a novel weighting scheme for the graph and propose a general parameter estimation technique in which the parameters adapt themselves to the image. We achieve this not by focusing on the parameters, but rather the relationship between the parameters. We then isolate these relationships in proxy relational parameters which we then tune for fluorescence images.
 
 \subsection{Proposed Technique}
-\blindtext
+We first explain the method used to weight the graph. We begin by normalising the data and smoothing connections. We use the Euclidean distance to weighting of the edges connecting adjacent nodes, i.e. diagonally adjacent node in the 8-connected graph would be scaled by $\frac{1}{\sqrt{2}}$, etc.
 
-\subsection{Optimisation}
-\blindtext
+The image pixel values are also normalised i.e. $p \in [0,1]$, where $p$ is the pixel value of the $i$-th pixel in the image. The edge connecting the source to the node which corresponds to pixel $i$ is given by  $E^i(0)|_{i=p} = \lambda_0|p-c_0|^2$. This is how far away the pixel is from the average foreground/object pixel intensity $c_0$.  Similarly, the weight of the connection from the node to the sink is given by $E^i(1)|_{i=p}=\lambda_1|p-c_1|^2$, i.e. how far away the pixel is from the average background pixel intensity $c_1$.
+
+Whether a node is connected to the source or the sink after segmentation depends on its connections which are wighted by the previously defined energy functions. It behooves use to study then, the relationship between the energy functions. We see that there are two tunable parameters namely $\lambda_0$ and $\lambda_1$. It is the relationship between these two parameter that heavily influence the output. We simplify and explicitely formalise the relationship between and set
+\begin{equation}
+	\lambda_0 = \alpha\lambda_1.
+	\label{eq:l0l1dependancy}
+\end{equation}
+Forcing this relationship make further analysis simpler and more intuitive. An immediate constraint is $\alpha > 0$, since we require all data conenctions to be positive, i.e $E^i(0), E^i(1) \geq 0$.
+
+We will now analyse the flow through a single node in the 8-connected graph, we use \Cref{fig:singlenodeconstruction} to facilitate our explanation. Two nodes are maximally connected if their corresponding pixel values are the same, i.e. there is no difference between them. Let this value be $\mu$. Hence, the maximum possible flow into or out of a node to its neighbours is
+\begin{equation}
+	f_{max} = 4\mu + 4\frac{\mu}{\sqrt{2}} = \mu \left( 2\sqrt{2} + 4\right).
+	\label{eq:neighbourhoodsaturation}
+\end{equation}
+
+We know that for a node $p$ to belong to the source set, i.e. $ p \in S$, the incoming flow from the source must completely saturate all outlets. This can be expressed as
+\begin{equation}
+	E^i(0) > E^i(1) + \mu \left( 2\sqrt{2} + 4\right).
+	\label{eq:sourcesaturation}
+\end{equation}
+Similarly, to guarantee the node will be in the sink set, $p \in T$, we have
+\begin{equation}
+	E^i(1) > E^i(0) + \mu \left( 2\sqrt{2} + 4\right).
+	\label{eq:sinksaturation}
+\end{equation}
+
+\tikzstyle{vertex}=[circle,thick,draw]
+\begin{figure}[!h]
+	\centering
+	\begin{tikzpicture}[scale=1.0]
+	\draw (0,0) -- (2,0);
+	\draw (0,0) -- (-2,0);
+	\draw (0,0) -- (0,1) node[right] {$\mu$} -- (0,2);
+	\draw (0,0) -- (0,-2);
+	
+	\draw (0,0) -- (-2,2);
+	\draw (0,0) -- (2,2);
+	\draw (0,0) -- (-1,-1) node[right] {$\frac{\mu}{\sqrt{2}}$} -- (-2,-2);
+	\draw (0,0) -- (2,-2);
+	
+	\draw[red,thick] (-5,2) .. controls(-4,-1) and (-2,1.5) .. (0,0);
+	\draw[red,->,thick] (-2.5,0.48) -- (-2.4,0.485) node[above] {$E^i(0)$};
+	\node[vertex,red,fill=red!20] at (-5,2) {$S$};
+	\draw[blue,thick] (5,-2) .. controls(4,1) and (2,-1.5) .. (0,0);
+	\draw[blue,<-,thick] (2.5,-0.48) -- (2.4,-0.485) node[below] {$E^i(1)$};
+	\node[vertex,blue,fill=blue!20] at (5,-2) {$T$};
+	
+	\draw[fill=white] (0,0) circle (0.35);
+	\draw[fill=black] (-2,0) circle (0.25);
+	\draw[fill=black] (2,0) circle (0.25);
+	
+	\draw[fill=black] (0,2) circle (0.25);
+	\draw[fill=black] (-2,2) circle (0.25);
+	\draw[fill=black] (2,2) circle (0.25);
+	
+	\draw[fill=black] (0,-2) circle (0.25);
+	\draw[fill=black] (-2,-2) circle (0.25);
+	\draw[fill=black] (2,-2) circle (0.25);
+	\end{tikzpicture}
+	\caption{Fully connected single node.}
+	\label{fig:singlenodeconstruction}
+\end{figure}
+
+To aid in understanding the energies, we use \Cref{fig:dataenergyplot}.
+
+\begin{figure}[!t]
+	\centering
+	\begin{tikzpicture}[scale=2]
+	\draw[->] (-0.2,0) -- (6,0) node[right] {$p$};
+	\draw[->] (0,-0.2) -- (0,5) node[above] {$E$};
+	
+	\draw[dashed] (0,0.5) -- (5,0.5);
+	\draw[dashed] (0,3) -- (6,3);
+	\draw[red,thick] (-0.5,5) parabola bend (1.5,0) (3.4,5) node[below right] {$E_0(p) = \lambda_0 (p-c_0)^2$};
+	\draw[blue,thick] (-0.5,0.8) parabola bend (4.5,0) (6,0.2) node[above left] {$E_1(p) = \lambda_1 (p-c_1)^2$};
+	\draw[dashed,blue,thick] (-0.5,3.8) parabola bend (4.5,3) (6,3.2) node[above left] {$\lambda_1 (p-c_1)^2 + \mu(2\sqrt{2}+4)$};
+	\draw[shift={(1.5,0)}] (0pt,2pt) -- (0pt,-2pt) node[below] {$c_0$};
+	\draw[shift={(4.5,0)}] (0pt,2pt) -- (0pt,-2pt) node[below] {$c_1$};
+	\draw[shift={(0,0.5)}] (2pt,0pt) -- (-2pt,0pt) node[left] {$\mu$};
+	\draw[shift={(0,3)}] (2pt,0pt) -- (-2pt,0pt) node[left] {$\mu(2\sqrt{2}+4)$};
+	
+	\draw[dashed,black] (3.0,4) -- (3.0,-0.3) node[below] {$h$};
+	\draw[dashed,black] (1.9,1) -- (1.9,-0.3) node[below] {$p_e$};
+	%\draw[dashed,black] (0.94,1) -- (0.94,-0.3) node[below] {$p_e$};
+	
+	\draw[red,<-] (0.43,1.52) -- (1.5,2) node[above] {Source weights};
+	\draw[blue,<-] (3.2,0.08) -- (3.9,1) node[above] {Sink weights};
+	\end{tikzpicture}
+	\caption{Data energy functions plot.}
+	\label{fig:dataenergyplot}
+\end{figure}
+
+For quadratic energies with $0 < c_0 < c_1 < 1$, there is a point, between $c_0$ and $c_1$, where the incoming flow from the source completely saturates the sink with no excess remaining. This point, where the energies are equal, we call $p_e$, i.e. $E_0(p_e) = E_1(p_e)$. Taking into account the relation in \Cref{eq:l0l1dependancy}, this point of zero net flow is found to be
+\begin{equation}
+	p_e = c_0 + \frac{c_1-c_0}{\sqrt{\alpha} + 1}
+	\label{eq:pe}
+\end{equation}
+The point where the energies are equal, $p_e$, is shown in \Cref{fig:dataenergyplot}.
+
+We now shift our focus on the relationship between $p_e$ and $\alpha$. We see that $\alpha$ is the only tuneable parameter. From this inverse relationship we note three major points. These are
+\begin{equation*}\begin{split}
+	\text{if } \alpha=1, p_e=c_0+\frac{c_1-c_0}{1+\sqrt{1}} = \frac{c_0+c_1}{2} \hspace{30pt}&\text{(midpoint between $c_0$ and $c_1$)}\\
+	\lim_{\alpha\to\infty}p_e = c_0\hspace{30pt} &\text{(maximum $\alpha$ yields lower-bound on $p_e$)}\\
+	\lim_{\alpha\to0}p_e = c_1\hspace{30pt} &\text{(minimum $\alpha$ yields upper-bound on $p_e$)}
+\end{split}\end{equation*}
+This is relationship is shown graphically in \Cref{fig:alphaperelationship}.
+\begin{figure}[!h]
+	\centering
+	\begin{tikzpicture}[scale=1]
+	\draw[->] (0,0) -- (15,0) node[right] {$p$};
+	\draw[shift={(3,0)}] (0pt,4pt) -- (0pt,-4pt) node[below] {$c_0$};
+	\draw[shift={(12,0)}] (0pt,4pt) -- (0pt,-4pt) node[below] {$c_1$};
+	\draw[dashed,black] (7.5,1.5) node[above] {$p_e = \frac{c_0+c_1}{2}$} -- (7.5,-0.3) node[below] {$\alpha=1$};
+	\draw[black,->,thick] (7.5,0.5) -- (5.5,0.5) node[above] {increasing $\alpha$} -- (4.5,0.5);
+	\draw[black,->,thick] (7.5,0.5) -- (9.5,0.5) node[above] {decreasing $\alpha$} -- (10.5,0.5);
+	\end{tikzpicture}
+	\caption{Relationship between $\alpha$ and $p_e$.}
+	\label{fig:alphaperelationship}
+\end{figure}
+
+If we can make a good estimation for $p_e$, $c_0$ and $c_1$ for the segmentated image, then it can be shown that the corresponding $\alpha$ can be calculated as
+\begin{equation}
+	\alpha = \left( \frac{c_1-c_0}{p_e-c_0}-1 \right)^2
+	\label{eq:alphaapproximation}
+\end{equation}
+
+When we calculated the intersection between the energies $p_e$, we ignored the other point that was out of the range $[c_0, c_1]$.Let this point be $p_{e^*}$. If this point is positive and $0<p_{e^*}<c_0$ then we must ensure that at no point within this range must the source flow saturate all outgoing edges. This forces a limit on how low $\mu$ can be. This is only of significant concern when $\alpha>1$. We only need to concern ourselves with the point $p=0$ as this is the point where the difference $E^i(0)-E^i(1)$ is the largest. Taking into account the relation in \Cref{eq:l0l1dependancy}, the lower-bound on $\mu$ can be shown to be 
+\begin{equation}
+	\mu > \frac{\lambda_1(\alpha c_0^2-c_1^2)}{\left( 2\sqrt{2} + 4\right)}
+	\label{eq:mulowerbound}
+\end{equation}
+
+From \Cref{eq:sourcesaturation} we can see that there is a point beyond which all nodes which correspond to pixel value higher than that point will be saturated and have excess flow; this means that they will be in the source set. We will call this point the \textit{saturation point} and denote it by $h$. This is shown in \Cref{fig:dataenergyplot}. This point can be determined using
+\begin{equation}
+	h = \frac{(\alpha c_0-c_1)+\sqrt{\alpha(c_0-c_1)^2+\frac{\mu(2\sqrt{2}+4)}{\lambda_1}(\alpha-1)}}{\alpha-1}
+	\label{eq:h}
+\end{equation}
+This point is marked off in \Cref{fig:dataenergyplot}.
+
+Therefore, given good approximations for $c_0$, $c_1$, $\alpha$, $h$ and $\mu$, we can calculate the appropriate value for $\lambda_1$. This can be shown to be
+\begin{equation}
+	\lambda_1 = \frac{\mu(2\sqrt{2}+4)}{\alpha(h-c_0)^2-(h-c_1)^2}
+	\label{eq:lambda1approximation}
+\end{equation}
+
+The parameter estimation is based on the assumption that sufficiently good approximations for $c_0$, $c_1$, $p_e$ and $h$ can be obtained. By sufficiently good we are referring to the closeness to the values these parameters would be for an ideal segmentation. From these approximations, we calculate $\alpha$ using \Cref{eq:alphaapproximation}. The parameters $\mu$ and $\lambda_1$ are not separable, therefore we choose to set $\mu$. We can then calculate $\lambda_1$ using \Cref{eq:lambda1approximation}. Finally $\lambda_0$ can be calculated using \Cref{eq:l0l1dependancy}. In the next section we discuss how we make the guess for good approximations for the required parameters.
+
+\subsection{Tuning the Proxy Parameters}
+The properties of the images obtained in fluorescence microscopy imaging can be used to guide the parameter estimation process. We focus specifically on black background images. Due to the fact that the predominant form of noise in the imaging system in Poisson distributed, we can further assume that the darker the background, the less noise that is present therein. The Poisson process also tells us that brighter regions exhibit a greater intensity variation due to the sampling process. Therefore, the curve for $E^i(1)$ is less convex than $E^i(0)$ as in \Cref{fig:dataenergyplot} and, resultantly, the value for $p_e$, in \Cref{fig:alphaperelationship}, is shifted to the left. This places a new lower-bound on $\alpha$ for fluorescence images
+\begin{equation}
+	\alpha \geq 1.
+	\label{eq:alphalowerboundFM}
+\end{equation}
 
 \section{Experimental Results}
 \blindtext
