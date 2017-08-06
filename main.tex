@@ -765,19 +765,176 @@ Therefore, given good approximations for $c_0$, $c_1$, $\alpha$, $h$ and $\mu$, 
 The parameter estimation is based on the assumption that sufficiently good approximations for $c_0$, $c_1$, $p_e$ and $h$ can be obtained. By sufficiently good we are referring to the closeness to the values these parameters would be for an ideal segmentation. From these approximations, we calculate $\alpha$ using \Cref{eq:alphaapproximation}. The parameters $\mu$ and $\lambda_1$ are not separable, therefore we choose to set $\mu$. We can then calculate $\lambda_1$ using \Cref{eq:lambda1approximation}. Finally $\lambda_0$ can be calculated using \Cref{eq:l0l1dependancy}. In the next section we discuss how we make the guess for good approximations for the required parameters.
 
 \subsection{Tuning the Proxy Parameters}
-The properties of the images obtained in fluorescence microscopy imaging can be used to guide the parameter estimation process. We focus specifically on black background images. Due to the fact that the predominant form of noise in the imaging system in Poisson distributed, we can further assume that the darker the background, the less noise that is present therein. The Poisson process also tells us that brighter regions exhibit a greater intensity variation due to the sampling process. Therefore, the curve for $E^i(1)$ is less convex than $E^i(0)$ as in \Cref{fig:dataenergyplot} and, resultantly, the value for $p_e$, in \Cref{fig:alphaperelationship}, is shifted to the left. This places a new lower-bound on $\alpha$ for fluorescence images
+The properties of the images obtained in fluorescence microscopy imaging can be used to guide the parameter estimation process. We focus specifically on black background fluorescent images. Due to the fact that the predominant form of noise in the imaging system in Poisson distributed, we can further assume that the darker the background, the less noise that is present therein. The Poisson process also tells us that brighter regions exhibit a greater intensity variation due to the sampling process. Therefore, the curve for $E^i(1)$ is less convex than $E^i(0)$ as in \Cref{fig:dataenergyplot} and, resultantly, the value for $p_e$, in \Cref{fig:alphaperelationship}, is shifted to the left. This places a new lower-bound on $\alpha$ for fluorescence images
 \begin{equation}
 	\alpha \geq 1.
 	\label{eq:alphalowerboundFM}
 \end{equation}
 
+The tuning process we used is as follows:
+We manually segmented the fluorescent images in \Cref{fig:tuningset}. The segmentation results that were closest to the groundtruth were chosen and the corresponding proxy parameters were calculated for each image. The final setting for the proxy parameter was taken as the average value for each proxy parameter from all images. 
+
+\def \myWidth {0.146}
+\begin{figure}[!t]
+	\centering
+	\subfigure[Image 1]
+	{
+		\includegraphics[width=\myWidth\columnwidth]{figures/cell_database_gray/1gray.jpg}
+		\label{fig:1gray}
+	}
+	\subfigure[Image 2]
+	{
+		\includegraphics[width=\myWidth\columnwidth]{figures/cell_database_gray/2gray.jpg}
+		\label{fig:2gray}
+	}
+	\subfigure[Image 3]
+	{
+		\includegraphics[width=\myWidth\columnwidth]{figures/cell_database_gray/3gray.jpg}
+		\label{fig:3gray}
+	}
+	\subfigure[Image 4]
+	{
+		\includegraphics[width=\myWidth\columnwidth]{figures/cell_database_gray/4gray.jpg}
+		\label{fig:4gray}
+	}
+	\subfigure[Image 5]
+	{
+		\includegraphics[width=\myWidth\columnwidth]{figures/cell_database_gray/5gray.jpg}
+		\label{fig:5gray}
+	}
+	\subfigure[Image 6]
+	{
+		\includegraphics[width=\myWidth\columnwidth]{figures/cell_database_gray/6gray.jpg}
+		\label{fig:6gray}
+	}
+	\caption{Images from tuning set.}
+	\label{fig:tuningset}
+\end{figure}
+
+Since the curves energy functions, $E^i(0)$ and $E^i(1)$, can be tuned relative to a fixed value for $\mu$, which this would not impact significantly on the range of possible solution sets, we set $\mu=1$ in all our manual parameter tuning. We use a stopping criterion of $\epsilon=1\times10^{-3}$. We compared the effect of using Otsu binarization, K-means ($k=2$) and Expectation-Maximisation for Gaussian Mixture Modelling (EMGMM) with ($k=2$) for generating the initial means, $c0$ and $c_1$. The values used for $\alpha \in [1, 10, 20, 30, 40, 45, 50]$ and the values used for $\lambda_1 \in [50, 100, 150, 200, 400, 800]$. The remaining parameters were calculated from $\mu$, $\alpha$ and $\lambda_1$.
+
+As final results we take the means of the final segmentation for the background and foreground regions. An acceptable solution was one that achieved at least $70\%$ of the final means from the ground truth for each region. From the acceptable results, we calculate the values for $p_e$, \Cref{eq:pe}, and $h$, \Cref{eq:h}.
+The means for each image can vary greatly.
+To put the values of $p_e$ and $h$ into a relative perspective, they are shown as a fraction of the distance between $c_0$ and $c_1$.
+Let $k_p \in (0,1)$ be the fraction of the distance $p_e-c_0$ and $c_1-c_0$ as illustrated in \Cref{fig:kp}.
+Let $k_h \in (k_h,1)$ be the fraction of the distance $h-c_0$ and $c_1-c_0$ as illustrated in \Cref{fig:kh}, we have $0 < k_p < k_h$.
+
+\begin{figure}[!h]
+	\centering
+	\begin{tikzpicture}[scale=1]
+	\draw[-] (0,0) -- (15,0) node[right] {$p$};
+	\draw[shift={(3,0)}] (0pt,4pt) -- (0pt,-4pt) node[below] {$c_0$};
+	\draw[shift={(12,0)}] (0pt,4pt) -- (0pt,-4pt) node[below] {$c_1$};
+	
+	\draw[dashed,black] (5.0,1.5) -- (5.0,-0.3) node[below] {$p_e$};
+	
+	\draw[black,*-*,thick] (5.0,0.5) -- (4.0,0.5) node[above] {$k_p(c_1-c_0)$} -- (3.0,0.5);
+	
+	\end{tikzpicture}
+	\caption{$p_e$ as a fraction of the distance between $c_0$ and $c_1$.}
+	\label{fig:kp}
+\end{figure}
+
+\begin{figure}[!h]
+	\centering
+	\begin{tikzpicture}[scale=1]
+	\draw[-] (0,0) -- (15,0) node[right] {$p$};
+	\draw[shift={(3,0)}] (0pt,4pt) -- (0pt,-4pt) node[below] {$c_0$};
+	\draw[shift={(12,0)}] (0pt,4pt) -- (0pt,-4pt) node[below] {$c_1$};
+	
+	\draw[dashed,black] (9.0,1.5) -- (9.0,-0.3) node[below] {$h$};
+	
+	\draw[black,*-*,thick] (9.0,0.5) -- (6.0,0.5) node[above] {$k_h(c_1-c_0)$} -- (3.0,0.5);
+	\draw[black,*-*,thick] (9.0,0.5) -- (10.5,0.5) node[above] {$(1-k_h)(c_1-c_0)$} -- (12.0,0.5);
+	\end{tikzpicture}
+	\caption{$h$ as a fraction of the distance between $c_0$ and $c_1$.}
+	\label{fig:kh}
+\end{figure}
+
+Upon comparing the initial means and final means for the acceptable segmentation results, it was noted the the values of the initial means are larger. This is due to over-segmentation produced by Otsu, K-means and EMGMM clustering. A na{\"i}ve approach to shifting the initial means closer to the final means is to dilate the initial mask. This pushes the boundaries of the contour for the object to accept the lower intensity neighbouring pixels, as well as remove these relatively higher values from the background mask. If we are able to make a better guess to the initial means, then the fewer iterations are needed to converge within the stopping criterion.
+
+To determine the optimal dilation size, we compare the difference of the mean values for each image, for the acceptable segmentation results only. We use an elliptical element for dilation and the size of the dilation ranged from $r \in [1, 2, 3, 5 , 7, 9]$. A dilation size of 3 for a elliptical dilation element results in mean values that are closest to the average final means.
+
+When defining the values for $p_e$ and $h$ implicitly and $k_p$ and $k_h$ respectively, we find the updated equation for determining $\alpha$ is simplified to
+\begin{equation}
+	\alpha = \left( \frac{1-k_p}{k_p} \right)^2
+	\label{eq:alphafromkp}
+\end{equation}
+
+%\begin{equation}\begin{split}
+%	\alpha-1 = \frac{1-2k_p+k_p^2-k_p^2}{k_p^2} = \frac{1-2k_p}{k_p^2}
+%\end{split}\end{equation}
+
+%The point where the energies are equal can be calculated as:
+%\begin{equation}
+%	p_e = c_0 + k_p(c_1-c_0)
+%\end{equation}
+
+%Following from \Cref{eq:lambda1approximation}
+%
+%\begin{equation*}
+%	h = (c_1-c_0)^2\left( \left( \frac{1-2k_p}{k_p^2} \right)k_h^2 +2k_h -1 \right)
+%\end{equation*}
+
+The weighting parameter $\lambda_1$ can be calcualted as
+
+\begin{equation}
+	\lambda_1 = \frac{\mu \left( 2\sqrt{2}+4\right)}{(c_1-c_0)^2\left( \left( \frac{1-2k_p}{k_p^2} \right)k_h^2 +2k_h -1 \right)}
+	\label{eq:lambda1fromkpandkh}
+\end{equation}
+
+%The parameters $\alpha$ and $\lambda_1$, in the proposed parameter estimation method, depend greatly on predicting good final means, $c_0$ and $c_1$, as well as $p_e$ and $h$ for the ideal segmentation.
+
+For determining $\alpha$ we found the average of all $k_p$ for all acceptable segmentations. This is calculated to be
+\begin{equation*}
+	k_p = 0.154494.
+\end{equation*}
+From this we can calculate the value for $\alpha$ immediately using \Cref{eq:alphafromkp}. This turns out to be
+\begin{equation}
+	\alpha = 29.9509.
+\end{equation}
+Similarly, to determine $h$ we find the average of all $k_h$ for all acceptable segmentations. This is calculated to be
+\begin{equation*}
+	k_h = 0.412737.
+\end{equation*}
+An appropriate value for $\lambda_1$ depends on $c_0$ and $c_1$, as can be seen in \Cref{eq:lambda1fromkpandkh}, which can only be determined after the inital means are generated.
+
+\subsection{Parameter Estimation Process}
+We now present the final parameter estimation process. The parameters whose values are fixed are
+\begin{enumerate}
+	\item $\mu=1$
+	\item $k_p = 0.154494$
+	\item $k_h = 0.412737$
+	\item $\alpha = 29.9509$
+\end{enumerate}
+We first segment the image to determine the initial $c_0$ and $c_1$. We can then calculate $\lambda_1$ using \Cref{eq:lambda1fromkpandkh}. Finally, we can calculate $\lambda_0$ using \Cref{eq:l0l1dependancy}.
+The remaining parameter is the stopping criterion $\epsilon$ which we set to  $1 \times 10^{-3}$.
+
 \section{Experimental Results}
-\blindtext
 
-\subsection{Learning Parameters on Learning Data Set}
-\blindtext
+We compare our results to two previously published parameter settings.
+%The first is the parameter settings used El Zehiry \textit{et al.} \citep{ElZehiry2007}, which is where the Chan-Vese Graph Cut technique was first published.
+Their results showed excellent segmentation output on synthetic images and mammography images with very high robustness against noise. They do not specify the noise type.
+%The second parameter setting which we compete against is presented by Masaka \textit{et al.} \citep{Maska2013}.
+Their parameter setting was based on a time-lapse series of fluorescence images. Their scheme is a hybrid of algorithms designed to segment whole fluorescent cells; however, we use the parameter setting they have presented for segmentation only. Their parameter setting was obtained by minimising the Jaccard coefficient over the time-lapse series.
+%Their results show a greater area of cell detection and smoother boundaries; although, the smoother contours are a result of CED-ORI \citep{Weickert2002} which is part of the scheme before segmentation.
 
-\subsection{Testing Parameters on Test Data Set}
+To generate the initial means we used the EMGMM with $k=2$ which was followed by an elliptical dilation of size $3$.
+The results of all segmentation scheme are shown from \Cref{fig:testresult188} to \Cref{fig:testresult42451}.
+
+In \Cref{tab:segmentationefficiency}, which compares the segmentation efficiency of each method, we differentiate between methods on the same image as follows:
+
+\textbf{[imageno]-[method]}, 
+
+where \textit{imageno} goes from $1$ to $25$ and \textit{method} is defined as follows:
+\begin{enumerate}
+	\item [\textbf{n}] - using parameter setting presented by El-Zehiry \textit{et. al} %\citep{ElZehiry2007}.
+	\item [\textbf{m}] - using parameter setting presented by Masaka \textit{et. al} %\citep{Maska2013}.
+	\item [\textbf{d}] - Proposed method with parameters estimated from an initial EMGMM segmentation with $k=2$ and an elliptical dilation of $3px$.
+\end{enumerate}
+
+In \Cref{tab:segmentationefficiency} we compare the accuracy and MCC of each segmented result for each scheme. Accuracy is the fraction of the pixels that are correctly classified from among all pixels. MCC is the \textit{Matthews Correlation Coefficient} and is more accurate measure of accuracy when comparing classes whose sizes differ greatly. 
+
 \def \myWidth {0.2}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 188
@@ -1837,6 +1994,8 @@ The properties of the images obtained in fluorescence microscopy imaging can be 
 	\caption{Image 25 from test set segmentation results.}
 	\label{fig:testresult42451}
 \end{figure}
+
+\pagebreak
 
 \begin{longtabu}[!h] {|c|c|c|c|c|c|c|c|c|}
 	\caption{Segmentation Efficiency.} \label{tab:segmentationefficiency} \\
