@@ -510,17 +510,15 @@ Image segmentation, graph cuts, fluorescence, active-contours, Chan-Vese, Mumfor
 
 \section{Introduction}
 \label{sec:Intro}
-\textbf{Lay the foundation to present the problem.} Amount of images. Problems with the images. The type of solutions available that miss solving the problem.
-\textbf{Present the problem.}
-\textbf{What solution do we seek.}
-\textbf{Scope of the paper.}
-\textbf{Other tried approaches. What are their weaknesses? What did they sacrifice to get that scheme or result.}
-\textbf{What schemes will we be competing with.}
-\textbf{Organisation.} Firstly, we begin in \Cref{sec:CVformulation} with a brief introduction to the Chan-Vese formulation of the  Mumford-Shah energy functional. Then in \Cref{sec:CVgraphcut} we introduce the graph-cut approach to image segmentation and how it is used to solve the Chan-Vese image segmentation problem. We then develop the proposed technique for parameter estimation in \Cref{sec:Proptechnique}. In \Cref{sec:Expresults} we show some experimental results and demonstrate the efficiency and robustness of this scheme. We also compare the proposed scheme against two other well-known schemes. Our concluding remarks are shown in \Cref{sec:Conc}.
+The ability to attain images at levels beyond the capacity of the human eye is an extremely important asset in scientific inquiry and study. Images of the microscopic world inherently contain a lot of useful data which has proven to be immensely helpful in the medical and biological fields \textcolor{red}{[REF HERE]}. A common tool for obtaining these images is the fluorescence microscope. The rate at which fluorescent images are generated is capped by the rate at which we're able to effectively and efficiently analyse image data \textcolor{red}{[REF HERE]}. At the heart of studying fluorescent images, is the segmentation of the object of interest. Segmentation is almost always the first step before moving on in the pipeline \textcolor{red}{[REF HERE]}. Hence, the efficiency of the system as a whole depends strongly on the accuracy of image segmentation. Unlike with images in many other fields, fluorescent images are greatly diverse. This poses a problem in the image segmentation step. Many, instead, prefer to work on subdomains within fluorescence imaging and devise a setting for the parameters of a certain scheme \textcolor{red}{[REF HERE]}. Though this does help, the scope of the solution is too limited and barely covers all cases within that subdomain. We seek a solution that is able to cover a very broad area with consistently high accuracy and high robustness for all fluorescent images. This means, enabling the parameters to change to suit the image.
+
+In this paper we take a step in that direction by allowing the parameters of the graph cut solution to the Chan-Vese functional to be determined on an image-by-image basis. This is a major step in fluorescent image segmentation. The scheme which we present is highly adaptable to any other field.
+
+The remainder of this paper is organised as follows; firstly, we begin in \Cref{sec:CVformulation} with a brief introduction to the Chan-Vese formulation of the  Mumford-Shah energy functional. Then in \Cref{sec:CVgraphcut} we introduce the graph-cut approach to image segmentation and how it is used to solve the Chan-Vese image segmentation problem. We then develop the proposed technique for parameter estimation in \Cref{sec:Proptechnique}. In \Cref{sec:Expresults} we show some experimental results and demonstrate the efficiency and robustness of this scheme. We also compare the proposed scheme against two other well-known schemes. Our concluding remarks are shown in \Cref{sec:Conc}.
 
 \section{Chan-Vese Formulation of the Mumford-Shah Energy Functional}
 \label{sec:CVformulation}
-The Mumford-Shah evolution energy functional is a segmentation model to be minimised over an approximation image $u$ of the input image $u_0$. The level set representation of the Mumford-Shah energy function is 
+The Mumford-Shah evolution energy functional \textcolor{red}{[REF HERE]} is a segmentation model to be minimised over an approximation image $u$ of the input image $u_0$. The level set representation of the Mumford-Shah energy function is 
 \begin{equation}
 \begin{split}
 	F(c_1, c_2, \phi) & = \mu \int_\Omega \delta(\phi(x,y))|\nabla\phi(x,y)|dxdy \\
@@ -565,8 +563,7 @@ The means can now be calculated using
 	c_2 = \frac{\sum_p u(x,y)(1-x_p)}{\sum_p (1-x_p)}.
 \end{equation}
 
-For simplification, set $\nu = 0$. Kolmogorov and Boykov in [] used the Cauchy-Crofton thereom to approximate the length of a contour $C$ by counting the number of intersections with the line $L$. By using this approximation, it can be shown that the Euclidean contour length can
- be expressed as
+For simplification, set $\nu = 0$. Kolmogorov and Boykov in  \textcolor{red}{[REF HERE]} used the Cauchy-Crofton thereom to approximate the length of a contour $C$ by counting the number of intersections with the line $L$. By using this approximation, it can be shown that the Euclidean contour length can be expressed as
 \begin{equation}
 	\lVert C \rVert_E = \sum_{p,q \in e_k} w_k( x_p(1-x_q) + x_q(1-x_p)).
 \end{equation}
@@ -583,7 +580,7 @@ The fully discrete form of \Cref{eq:mumfordshahfunction} is
 
 \section{Graph-Cut Model for Chan-Vese Segmentation}
 \label{sec:CVgraphcut}
-Graph Cuts are a well known optimisation problem in Combinatronics. Due to the duality known as the Max-Flow Min-Cut Thereom, there are several fast algorithms to find the mincut. Typically, it's easier to solve the the Max-Flow problem and bulk of the optimised algorithms are designed on Max-flow algorithms. Graph Cuts were unsuccesfully introduce into Computer Vision by Greig \textit{et al.} [] and was later popularised by Kolmogorov [].
+Graph Cuts are a well known optimisation problem in Combinatronics \textcolor{red}{[REF HERE]}. Due to the duality known as the Max-Flow Min-Cut Thereom \textcolor{red}{[REF HERE]}, there are several fast algorithms to find the mincut. Typically, it's easier to solve the the Max-Flow problem and bulk of the optimised algorithms are designed on Max-flow algorithms. Graph Cuts were unsuccesfully introduce into Computer Vision by Greig \textit{et al.} \textcolor{red}{[REF HERE]} and was later popularised by Kolmogorov \textcolor{red}{[REF HERE]}.
 
 A graph $G=(V, E)$ is a set of vertices/nodes $V$, and a set of directed edges $E$ with positive weights/capacities that connect these vertices. We let $uv$ be a directed edge going from $u$ to $v$. The weight of the edge is denoted by $c(u, v)$. In the 2-label graph cut, there are two more vertices that don't correspond to any pixels. These are the source $s$ and the sink $t$. All other nodes are directly connected to both the source and the sink. Therefore, a cut on $G$ is a partioning of $V$ into two disjoint connected sets $(V_s, V_t)$ such that $s \in V_s$ and $t \in V_t$. The cost of the cut is calculated as
 
@@ -591,18 +588,18 @@ A graph $G=(V, E)$ is a set of vertices/nodes $V$, and a set of directed edges $
 	c(V_s, V_t) = \sum_{i \in V_s, j \in V_t}c(i, j).
 \end{equation}
 
-Graph cuts are used to minimise energies of the form
+Graph cuts can be used to minimise energies of the form
 \begin{equation}
 	\argmin_{x \in \{0,1\}^m}	E(x) = \sum_i E^i(x_i) + \sum_{i<j}E^{i,j}(x_i, x_j).
 	\label{eq:graphcutenergyform}
 \end{equation}
 
-For an energy to be graph-representable, the pairwise interaction potentials must be submodular [], i.e. it must adhere to the following constraint.
+For an energy to be graph-representable, the pairwise interaction potentials must be submodular \textcolor{red}{[REF HERE]}, i.e. it must adhere to the following constraint.
 \begin{equation}
 	E^{i,j}(0,0) + E^{i,j}(1,1) \leq E^{i,j}(0,1) + E^{i,j}(1,0), \, \forall i < j.
 \end{equation}
 
-It has been shown in [] that \Cref{eq:discretemumfordshah} is submodular and hence the optimal solution can be found via graph cuts. The data and regularisation energy respectively in \Cref{eq:graphcutenergyform} is
+It has been shown in \textcolor{red}{[REF HERE]} that \Cref{eq:discretemumfordshah} is submodular and hence the optimal solution can be found via graph cuts. The data and regularisation energy respectively in \Cref{eq:graphcutenergyform} is
 \begin{equation}
 	E^i(x_i) = \lambda_1 |u(x,y)-c_1|^2 x_i + \lambda_2 |u(x,y)-c_2|^2 (1-x_i)
 \end{equation}
@@ -617,11 +614,11 @@ In this section we introduce the proposed method for Chan-Vese parameter estimat
 We devise a novel weighting scheme for the graph and propose a general parameter estimation technique in which the parameters adapt themselves to the image. We achieve this not by focusing on the parameters, but rather the relationship between the parameters. We then isolate these relationships in proxy relational parameters which we then tune for fluorescence images.
 
 \subsection{Proposed Technique}
-We first explain the method used to weight the graph. We begin by normalising the data and smoothing connections. We use the Euclidean distance to weighting of the edges connecting adjacent nodes, i.e. diagonally adjacent node in the 8-connected graph would be scaled by $\frac{1}{\sqrt{2}}$, etc.
+We first explain the method used to weight the graph. We begin by normalising the data and smoothing energies. We use the Euclidean distance to weighting of the edges connecting adjacent nodes, i.e. diagonally adjacent node in the 8-connected graph would be scaled by $\frac{1}{\sqrt{2}}$, etc.
 
 The image pixel values are also normalised i.e. $p \in [0,1]$, where $p$ is the pixel value of the $i$-th pixel in the image. The edge connecting the source to the node which corresponds to pixel $i$ is given by  $E^i(0)|_{i=p} = \lambda_0|p-c_0|^2$. This is how far away the pixel is from the average foreground/object pixel intensity $c_0$.  Similarly, the weight of the connection from the node to the sink is given by $E^i(1)|_{i=p}=\lambda_1|p-c_1|^2$, i.e. how far away the pixel is from the average background pixel intensity $c_1$.
 
-Whether a node is connected to the source or the sink after segmentation depends on its connections which are wighted by the previously defined energy functions. It behooves use to study then, the relationship between the energy functions. We see that there are two tunable parameters namely $\lambda_0$ and $\lambda_1$. It is the relationship between these two parameter that heavily influence the output. We simplify and explicitely formalise the relationship between and set
+Whether a node is connected to the source or the sink after segmentation depends on its connections which are wighted by the previously defined energy functions. It behooves us then, to study the relationship between the energy functions. From \Cref{eq:discretemumfordshah}, we see that there are three tuneable parameters namely $\mu$, $\lambda_0$ and $\lambda_1$. It is the relationship between these parameters that heavily influence the output. Firstly we will consider $\lambda_0$ and $\lambda_1$ whose relationship we simplify and explicitely formalise to
 \begin{equation}
 	\lambda_0 = \alpha\lambda_1.
 	\label{eq:l0l1dependancy}
@@ -941,20 +938,9 @@ Their parameter setting was based on a time-lapse series of fluorescence images.
 To generate the initial means we used the EMGMM with $k=2$ which was followed by an elliptical dilation of size $3$.
 The results of all segmentation scheme are shown from \Cref{fig:testresult188} to \Cref{fig:testresult42451}.
 
-In \Cref{tab:segmentationefficiency}, which compares the segmentation efficiency of each method, we differentiate between methods on the same image as follows:
-
-\textbf{[imageno]-[method]}, 
-
-where \textit{imageno} goes from $1$ to $25$ and \textit{method} is defined as follows:
-\begin{enumerate}
-	\item [\textbf{n}] - using parameter setting presented by El-Zehiry \textit{et. al} %\citep{ElZehiry2007}.
-	\item [\textbf{m}] - using parameter setting presented by Masaka \textit{et. al} %\citep{Maska2013}.
-	\item [\textbf{d}] - Proposed method with parameters estimated from an initial EMGMM segmentation with $k=2$ and an elliptical dilation of $3px$.
-\end{enumerate}
-
 In \Cref{tab:segmentationefficiency} we compare the accuracy and MCC of each segmented result for each scheme. Accuracy is the fraction of the pixels that are correctly classified from among all pixels. MCC is the \textit{Matthews Correlation Coefficient} and is a more accurate measure of accuracy when comparing classes whose sizes differ greatly. 
-
-We used a 8-connected graph for all methods.
+We used an 8-connected graph for all methods.
+The overall segmenation efficiency for the entire test set of 25 images is shown in \Cref{tab:overallsegmentationefficiency}.
 
 \begin{longtabu}[!h] {|c|c|c|c|c|c|c|}
 	\caption{Segmentation Efficiency.} \label{tab:segmentationefficiency} \\
@@ -963,19 +949,19 @@ We used a 8-connected graph for all methods.
 	& Accuracy & MCC & Accuracy & MCC &Accuracy & MCC  \\
 	\hline	1 & 0.770111 & 0.626140 & 0.967117 & 0.934010  & 0.959427 & 0.919468 \\
 	\hline	2 & 0.747253 & 0.416180 & 0.335449 & -0.008374 & 0.862671 & 0.748686 \\
-	\hline	5 & 0.912262 & 0.811918 & 0.851883 & 0.739708 & 0.916992 & 0.842769	\\
-	\hline	6 & 0.515686 & 0.300907 & 0.603195 & 0.028915 & 0.966156 & 0.931253	\\
-	\hline	9 & 0.886490 & 0.589732 & 0.938583 & 0.834732 & 0.990768 & 0.970635	\\ 
-	\hline	12& 0.806732 & 0.519903 & 0.309845 & 0.060018 & 0.905685 & 0.808358	\\ 
-	\hline	15& 0.962357 & 0.507270 & 0.098129 & 0.051537 & 0.990158 & 0.911074	\\
-	\hline	17& 0.888229 & 0.452365	& 0.150055 & 0.020336 & 0.915009 & 0.733933	\\
-	\hline	18& 0.595612 & 0.384991 & 0.567032 & NaN      & 0.960739 & 0.922580	\\
-	\hline	19& 0.852585 & 0.559970 & 0.570099 & 0.393942 & 0.975266 & 0.933388	\\
-	\hline	20& 0.914856 & 0.719637 & 0.679703 & 0.479944 & 0.966690 & 0.904878	\\
-	\hline	21& 0.913818 & 0.678954 & 0.181793 & 0.035231 & 0.967438 & 0.885155	\\
-	\hline	22& 0.703156 & 0.469557 & 0.449310 & NaN      & 0.981735 & 0.963345	\\
-	\hline	24& 0.921356 & 0.562635 & 0.136047 & 0.047223 & 0.882690 & 0.661018	\\
-	\hline	25& 0.573715 & 0.296608 & 0.511276 & NaN      & 0.959915 & 0.920148	\\
+	\hline	3 & 0.912262 & 0.811918 & 0.851883 & 0.739708 & 0.916992 & 0.842769	\\
+	\hline	4 & 0.515686 & 0.300907 & 0.603195 & 0.028915 & 0.966156 & 0.931253	\\
+	\hline	5 & 0.886490 & 0.589732 & 0.938583 & 0.834732 & 0.990768 & 0.970635	\\ 
+	\hline	6 & 0.806732 & 0.519903 & 0.309845 & 0.060018 & 0.905685 & 0.808358	\\ 
+	\hline	7 & 0.962357 & 0.507270 & 0.098129 & 0.051537 & 0.990158 & 0.911074	\\
+	\hline	8 & 0.888229 & 0.452365	& 0.150055 & 0.020336 & 0.915009 & 0.733933	\\
+	\hline	9 & 0.595612 & 0.384991 & 0.567032 & NaN      & 0.960739 & 0.922580	\\
+	\hline	10& 0.852585 & 0.559970 & 0.570099 & 0.393942 & 0.975266 & 0.933388	\\
+	\hline	11& 0.914856 & 0.719637 & 0.679703 & 0.479944 & 0.966690 & 0.904878	\\
+	\hline	12& 0.913818 & 0.678954 & 0.181793 & 0.035231 & 0.967438 & 0.885155	\\
+	\hline	13& 0.703156 & 0.469557 & 0.449310 & NaN      & 0.981735 & 0.963345	\\
+	\hline	14& 0.921356 & 0.562635 & 0.136047 & 0.047223 & 0.882690 & 0.661018	\\
+	\hline	15& 0.573715 & 0.296608 & 0.511276 & NaN      & 0.959915 & 0.920148	\\
 	\hline 
 \end{longtabu} 
 
@@ -1192,7 +1178,7 @@ The relationship formulae only take into account the infomation from the intensi
 		\includegraphics[width=\myWidth\columnwidth]{figures/propsedcv/dilated/emgmm21265finmask}
 		\label{fig:propsedCVemgmmdilate1265}
 	}
-	\caption{Image 5 from test set segmentation results.}
+	\caption{Image 3 from test set segmentation results.}
 	\label{fig:testresult1265}
 \end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1219,7 +1205,7 @@ The relationship formulae only take into account the infomation from the intensi
 		\includegraphics[width=\myWidth\columnwidth]{figures/propsedcv/dilated/emgmm210093finmask}
 		\label{fig:propsedCVemgmmdilate10093}
 	}
-	\caption{Image 6 from test set segmentation results.}
+	\caption{Image 4 from test set segmentation results.}
 	\label{fig:testresult10093}
 \end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1246,7 +1232,7 @@ The relationship formulae only take into account the infomation from the intensi
 		\includegraphics[width=\myWidth\columnwidth]{figures/propsedcv/dilated/emgmm212294finmask}
 		\label{fig:propsedCVemgmmdilate12294}
 	}
-	\caption{Image 9 from test set segmentation results.}
+	\caption{Image 5 from test set segmentation results.}
 	\label{fig:testresult12294}
 \end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1273,7 +1259,7 @@ The relationship formulae only take into account the infomation from the intensi
 		\includegraphics[width=\myWidth\columnwidth]{figures/propsedcv/dilated/emgmm213438finmask}
 		\label{fig:propsedCVemgmmdilate13438}
 	}
-	\caption{Image 12 from test set segmentation results.}
+	\caption{Image 6 from test set segmentation results.}
 	\label{fig:testresult13438}
 \end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1300,7 +1286,7 @@ The relationship formulae only take into account the infomation from the intensi
 		\includegraphics[width=\myWidth\columnwidth]{figures/propsedcv/dilated/emgmm221749finmask}
 		\label{fig:propsedCVemgmmdilate21749}
 	}
-	\caption{Image 15 from test set segmentation results.}
+	\caption{Image 7 from test set segmentation results.}
 	\label{fig:testresult21749}
 \end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1327,7 +1313,7 @@ The relationship formulae only take into account the infomation from the intensi
 		\includegraphics[width=\myWidth\columnwidth]{figures/propsedcv/dilated/emgmm232140finmask}
 		\label{fig:propsedCVemgmmdilate32140}
 	}
-	\caption{Image 17 from test set segmentation results.}
+	\caption{Image 8 from test set segmentation results.}
 	\label{fig:testresult32140}
 \end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1354,7 +1340,7 @@ The relationship formulae only take into account the infomation from the intensi
 		\includegraphics[width=\myWidth\columnwidth]{figures/propsedcv/dilated/emgmm235278finmask}
 		\label{fig:propsedCVemgmmdilate35278}
 	}
-	\caption{Image 18 from test set segmentation results.}
+	\caption{Image 9 from test set segmentation results.}
 	\label{fig:testresult35278}
 \end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1381,7 +1367,7 @@ The relationship formulae only take into account the infomation from the intensi
 		\includegraphics[width=\myWidth\columnwidth]{figures/propsedcv/dilated/emgmm237338finmask}
 		\label{fig:propsedCVemgmmdilate37338}
 	}
-	\caption{Image 19 from test set segmentation results.}
+	\caption{Image 10 from test set segmentation results.}
 	\label{fig:testresult37338}
 \end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1408,7 +1394,7 @@ The relationship formulae only take into account the infomation from the intensi
 		\includegraphics[width=\myWidth\columnwidth]{figures/propsedcv/dilated/emgmm237339finmask}
 		\label{fig:propsedCVemgmmdilate37339}
 	}
-	\caption{Image 20 from test set segmentation results.}
+	\caption{Image 11 from test set segmentation results.}
 	\label{fig:testresult37339}
 \end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1435,7 +1421,7 @@ The relationship formulae only take into account the infomation from the intensi
 		\includegraphics[width=\myWidth\columnwidth]{figures/propsedcv/dilated/emgmm238974finmask}
 		\label{fig:propsedCVemgmmdilate38974}
 	}
-	\caption{Image 21 from test set segmentation results.}
+	\caption{Image 12 from test set segmentation results.}
 	\label{fig:testresult38974}
 \end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1462,7 +1448,7 @@ The relationship formulae only take into account the infomation from the intensi
 		\includegraphics[width=\myWidth\columnwidth]{figures/propsedcv/dilated/emgmm240217finmask}
 		\label{fig:propsedCVemgmmdilate40217}
 	}
-	\caption{Image 22 from test set segmentation results.}
+	\caption{Image 13 from test set segmentation results.}
 	\label{fig:testresult40217}
 \end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1489,7 +1475,7 @@ The relationship formulae only take into account the infomation from the intensi
 		\includegraphics[width=\myWidth\columnwidth]{figures/propsedcv/dilated/emgmm241066finmask}
 		\label{fig:propsedCVemgmmdilate41066}
 	}
-	\caption{Image 24 from test set segmentation results.}
+	\caption{Image 13 from test set segmentation results.}
 	\label{fig:testresult41066}
 \end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1516,7 +1502,7 @@ The relationship formulae only take into account the infomation from the intensi
 		\includegraphics[width=\myWidth\columnwidth]{figures/propsedcv/dilated/emgmm242451finmask}
 		\label{fig:propsedCVemgmmdilate42451}
 	}
-	\caption{Image 25 from test set segmentation results.}
+	\caption{Image 15 from test set segmentation results.}
 	\label{fig:testresult42451}
 \end{figure}
 
