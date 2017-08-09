@@ -510,9 +510,11 @@ Image segmentation, graph cuts, fluorescence, active-contours, Chan-Vese, Mumfor
 
 \section{Introduction}
 \label{sec:Intro}
-The ability to attain images at levels beyond the capacity of the human eye is an extremely important asset in scientific inquiry and study. Images of the microscopic world inherently contain a lot of useful data which has proven to be immensely helpful in the medical and biological fields \textcolor{red}{[REF HERE]}. A common tool for obtaining these images is the fluorescence microscope. The rate at which fluorescent images are generated is capped by the rate at which we're able to effectively and efficiently analyse image data \textcolor{red}{[REF HERE]}. At the heart of studying fluorescent images, is the segmentation of the object of interest. Segmentation is almost always the first step before moving on in the pipeline \textcolor{red}{[REF HERE]}. Hence, the efficiency of the system as a whole depends strongly on the accuracy of image segmentation. Unlike with images in many other fields, fluorescent images are greatly diverse. This poses a problem in the image segmentation step. Many, instead, prefer to work on subdomains within fluorescence imaging and devise a setting for the parameters of a certain scheme \textcolor{red}{[REF HERE]}. Though this does help, the scope of the solution is too limited and barely covers all cases within that subdomain. We seek a solution that is able to cover a very broad area with consistently high accuracy and high robustness for all fluorescent images. This means, enabling the parameters to change to suit the image.
+The ability to attain images at levels beyond the capacity of the human eye is an extremely important asset in scientific inquiry and study. Images of the microscopic world inherently contain a lot of useful data which has proven to be immensely helpful in the medical and biological fields \textcolor{red}{[REF HERE]}. A common tool for obtaining these images is the fluorescence microscope. The rate at which fluorescent images are generated is capped by the rate at which we're able to effectively and efficiently analyse image data \textcolor{red}{[REF HERE]}. At the heart of studying fluorescent images, is the segmentation of the object of interest.
+Segmentation is almost always the first step in an image analysis pipeline \textcolor{red}{[REF HERE]}. Hence, the efficiency of the system as a whole depends strongly on the accuracy of image segmentation.
+Fluorescence images exhibit a much stronger diversity in comparison to other fields. This poses a problem since it rules out a "golden" parameter setting for any scheme. Many, instead, prefer to work on subdomains within fluorescence imaging and devise a setting for the parameters of a certain scheme \textcolor{red}{[REF HERE]}. Though this does help, the scope of the solution is too limited and barely covers all cases within that subdomain. We seek a solution that is able to cover a very broad area with consistently high accuracy and high robustness for all fluorescent images. This means, enabling the parameters to change to suit the image.
 
-In this paper we take a step in that direction by allowing the parameters of the graph cut solution to the Chan-Vese functional to be determined on an image-by-image basis. This is a major step in fluorescent image segmentation. The scheme which we present is highly adaptable to any other field.
+In this paper we take a step in that direction by allowing the parameters of the graph cut solution to the Chan-Vese functional to be determined on an image-by-image basis. This is a major step in fluorescent image segmentation. The scheme which we present is readily and easily adaptable to any other field.
 
 The remainder of this paper is organised as follows; firstly, we begin in \Cref{sec:CVformulation} with a brief introduction to the Chan-Vese formulation of the  Mumford-Shah energy functional. Then in \Cref{sec:CVgraphcut} we introduce the graph-cut approach to image segmentation and how it is used to solve the Chan-Vese image segmentation problem. We then develop the proposed technique for parameter estimation in \Cref{sec:Proptechnique}. In \Cref{sec:Expresults} we show some experimental results and demonstrate the efficiency and robustness of this scheme. We also compare the proposed scheme against two other well-known schemes. Our concluding remarks are shown in \Cref{sec:Conc}.
 
@@ -539,7 +541,7 @@ where $\lambda_1, \, \lambda_2, \, \mu, \text{ and } \nu$ are fixed parameters s
 	\label{eq:levelsetrepresentation}
 \end{equation}
 
-$c_1$ and $c_2$ are the arithmetic means of the intensities in the regions of $u$ defined by the masks $H(\phi(x,y)$ and $1-H(\phi(x,y)$ respectively. The piece-wise smooth approximation of the image is then 
+$c_1$ and $c_2$ are the arithmetic means of the intensities in the regions of $u$ defined by the masks $H(\phi(x,y))$ and $1-H(\phi(x,y))$ respectively. The piece-wise smooth approximation of the image is then 
 \begin{equation}
 	u(x,y) = c_1 H(\phi(x,y)) + c_2(1-H(\phi(x,y))).
 	\label{eq:piecewiseapproximation}
@@ -578,11 +580,15 @@ The fully discrete form of \Cref{eq:mumfordshahfunction} is
 	\label{eq:discretemumfordshah}
 \end{equation}
 
+This function is optimised by using the graph cut which we briefly introduce in the next section.
+
 \section{Graph-Cut Model for Chan-Vese Segmentation}
 \label{sec:CVgraphcut}
 Graph Cuts are a well known optimisation problem in Combinatronics \textcolor{red}{[REF HERE]}. Due to the duality known as the Max-Flow Min-Cut Thereom \textcolor{red}{[REF HERE]}, there are several fast algorithms to find the mincut. Typically, it's easier to solve the the Max-Flow problem and bulk of the optimised algorithms are designed on Max-flow algorithms. Graph Cuts were unsuccesfully introduce into Computer Vision by Greig \textit{et al.} \textcolor{red}{[REF HERE]} and was later popularised by Kolmogorov \textcolor{red}{[REF HERE]}.
 
-A graph $G=(V, E)$ is a set of vertices/nodes $V$, and a set of directed edges $E$ with positive weights/capacities that connect these vertices. We let $uv$ be a directed edge going from $u$ to $v$. The weight of the edge is denoted by $c(u, v)$. In the 2-label graph cut, there are two more vertices that don't correspond to any pixels. These are the source $s$ and the sink $t$. All other nodes are directly connected to both the source and the sink. Therefore, a cut on $G$ is a partioning of $V$ into two disjoint connected sets $(V_s, V_t)$ such that $s \in V_s$ and $t \in V_t$. The cost of the cut is calculated as
+A graph $G=(V, E)$ is a set of vertices/nodes $V$, and a set of directed edges $E$ with positive weights/capacities that connect these vertices. We let $uv$ be a directed edge going from $u$ to $v$. The weight of the edge is denoted by $c(u, v)$.
+
+The most common method of representing an image as a graph is to assign a node for each pixel; and  connect the neighbouring nodes with an edge. The weight of that edge is generally scaled by some distance metric according to the distance between the nodes. The weight of the edges reflect the correlation between the two corresponding pixels. A typical correlation is the similarity between two neighbouring nodes based on intensity. In the 2-label graph cut, there are two more vertices that don't correspond to any pixels. These are the source $s$ and the sink $t$. The source node connects to all pixel-nodes, and all pixel-nodes connect to the sink. Therefore, a cut on $G$ is a partioning of $V$ into two disjoint connected sets $(V_s, V_t)$ such that $s \in V_s$ and $t \in V_t$. The cost of the cut is calculated as
 
 \begin{equation}
 	c(V_s, V_t) = \sum_{i \in V_s, j \in V_t}c(i, j).
@@ -594,7 +600,7 @@ Graph cuts can be used to minimise energies of the form
 	\label{eq:graphcutenergyform}
 \end{equation}
 
-For an energy to be graph-representable, the pairwise interaction potentials must be submodular \textcolor{red}{[REF HERE]}, i.e. it must adhere to the following constraint.
+The first term is known as the data term and the second term is known as the regularisation/smoothing term. For an energy to be graph-representable, the pairwise interaction potentials must be submodular \textcolor{red}{[REF HERE]}, i.e. it must adhere to the following constraint.
 \begin{equation}
 	E^{i,j}(0,0) + E^{i,j}(1,1) \leq E^{i,j}(0,1) + E^{i,j}(1,0), \, \forall i < j.
 \end{equation}
@@ -609,23 +615,23 @@ It has been shown in \textcolor{red}{[REF HERE]} that \Cref{eq:discretemumfordsh
 
 \section{Chan-Vese Parameter Estimation for Graph-Cuts}
 \label{sec:Proptechnique}
-In this section we introduce the proposed method for Chan-Vese parameter estimation for graph-cuts. Previous parameter estimation schemes focussed on a certain genre of images or image characteristics, and these resulted in a set of hard-coded parameter settings. These hard-coded parameters are not very useful in producing consistent reults in the greater applications of image segmentation even within the fields for which they were optimised.
+In this section we introduce the proposed method for Chan-Vese parameter estimation for graph-cuts. Previous parameter estimation schemes focussed on a certain genre of images or image characteristics, and these resulted in a set of hard-coded parameter settings. These hard-coded parameters are not very useful in producing consistent results in the greater applications of image segmentation even within the fields for which they were optimised.
 
 We devise a novel weighting scheme for the graph and propose a general parameter estimation technique in which the parameters adapt themselves to the image. We achieve this not by focusing on the parameters, but rather the relationship between the parameters. We then isolate these relationships in proxy relational parameters which we then tune for fluorescence images.
 
 \subsection{Proposed Technique}
-We first explain the method used to weight the graph. We begin by normalising the data and smoothing energies. We use the Euclidean distance to weighting of the edges connecting adjacent nodes, i.e. diagonally adjacent node in the 8-connected graph would be scaled by $\frac{1}{\sqrt{2}}$, etc.
+We first explain the method used to weight the graph. We begin by normalising the data and regularisation energies.
+%We use the Euclidean distance to weighting of the edges connecting adjacent nodes, i.e. diagonally adjacent node in the 8-connected graph would be scaled by $\frac{1}{\sqrt{2}}$, etc.
+The image pixel values are also normalised i.e. $p \in [0,1]$, where $p$ is the pixel value of the $i$-th pixel in the image. The weight of the edge connecting the source node to a pixel-node which corresponds to pixel $i$ is given by  $E^i(0)|_{i=p} = \lambda_0|p-c_0|^2$. This is how far away the pixel is from the average foreground/object pixel intensity $c_0$.  Similarly, the weight of the connection from the node to the sink is given by $E^i(1)|_{i=p}=\lambda_1|p-c_1|^2$, i.e. how far away the pixel is from the average background pixel intensity $c_1$.
 
-The image pixel values are also normalised i.e. $p \in [0,1]$, where $p$ is the pixel value of the $i$-th pixel in the image. The edge connecting the source to the node which corresponds to pixel $i$ is given by  $E^i(0)|_{i=p} = \lambda_0|p-c_0|^2$. This is how far away the pixel is from the average foreground/object pixel intensity $c_0$.  Similarly, the weight of the connection from the node to the sink is given by $E^i(1)|_{i=p}=\lambda_1|p-c_1|^2$, i.e. how far away the pixel is from the average background pixel intensity $c_1$.
-
-Whether a node is connected to the source or the sink after segmentation depends on its connections which are wighted by the previously defined energy functions. It behooves us then, to study the relationship between the energy functions. From \Cref{eq:discretemumfordshah}, we see that there are three tuneable parameters namely $\mu$, $\lambda_0$ and $\lambda_1$. It is the relationship between these parameters that heavily influence the output. Firstly we will consider $\lambda_0$ and $\lambda_1$ whose relationship we simplify and explicitely formalise to
+Whether a node is connected to the source or the sink after segmentation depends on its connections which are weighted by the previously defined energy functions. It behooves us then, to study the relationship between the energy functions. From \Cref{eq:discretemumfordshah}, we see that there are three tuneable parameters namely $\mu$, $\lambda_0$ and $\lambda_1$. It is the relationship between these parameters that heavily influence the output. Firstly we will consider $\lambda_0$ and $\lambda_1$ whose relationship we simplify and explicitely formalise to
 \begin{equation}
 	\lambda_0 = \alpha\lambda_1.
 	\label{eq:l0l1dependancy}
 \end{equation}
 Forcing this relationship make further analysis simpler and more intuitive. An immediate constraint is $\alpha > 0$, since we require all data conenctions to be positive, i.e $E^i(0), E^i(1) \geq 0$.
 
-We will now analyse the flow through a single node in the 8-connected graph, we use \Cref{fig:singlenodeconstruction} to facilitate our explanation. Two nodes are maximally connected if their corresponding pixel values are the same, i.e. there is no difference between them. Let this value be $\mu$. Hence, the maximum possible flow into or out of a node to its neighbours is
+We will now analyse the flow through a single node in the 8-connected graph, we use \Cref{fig:singlenodeconstruction} to facilitate our explanation. Two nodes are maximally connected if their corresponding pixel values are the same, i.e. there is no difference between them. Let the weight of the edge between two nodes whose pixels have the same intensity be $\mu$. Hence, the maximum possible flow into or out of a node to its neighbours is
 \begin{equation}
 	f_{max} = 4\mu + 4\frac{\mu}{\sqrt{2}} = \mu \left( 2\sqrt{2} + 4\right).
 	\label{eq:neighbourhoodsaturation}
@@ -715,9 +721,11 @@ For quadratic energies with $0 < c_0 < c_1 < 1$, there is a point, between $c_0$
 \end{equation}
 The point where the energies are equal, $p_e$, is shown in \Cref{fig:dataenergyplot}.
 
-We now shift our focus on the relationship between $p_e$ and $\alpha$. We see that $\alpha$ is the only tuneable parameter. From this inverse relationship we note three major points. These are
+We now shift our focus on the relationship between $p_e$ and $\alpha$.
+From \Cref{eq:pe} we see that $\alpha$ is the only tuneable parameter.
+From this inverse relationship we note three major points. These are
 \begin{equation*}\begin{split}
-	\text{if } \alpha=1, p_e=c_0+\frac{c_1-c_0}{1+\sqrt{1}} = \frac{c_0+c_1}{2} \hspace{30pt}&\text{(midpoint between $c_0$ and $c_1$)}\\
+	\text{if } \alpha=1, p_e = \frac{c_0+c_1}{2} \hspace{30pt}&\text{(midpoint between $c_0$ and $c_1$)}\\
 	\lim_{\alpha\to\infty}p_e = c_0\hspace{30pt} &\text{(maximum $\alpha$ yields lower-bound on $p_e$)}\\
 	\lim_{\alpha\to0}p_e = c_1\hspace{30pt} &\text{(minimum $\alpha$ yields upper-bound on $p_e$)}
 \end{split}\end{equation*}
@@ -823,7 +831,7 @@ We manually segmented the fluorescent images in \Cref{fig:tuningset}. The segmen
 	\label{fig:tuningset}
 \end{figure}
 
-Since the curves energy functions, $E^i(0)$ and $E^i(1)$, can be tuned relative to a fixed value for $\mu$, which this would not impact significantly on the range of possible solution sets, we set $\mu=1$ in all our manual parameter tuning. We use a stopping criterion of $\epsilon=1\times10^{-3}$. We compared the effect of using Otsu binarization, K-means ($k=2$) and Expectation-Maximisation for Gaussian Mixture Modelling (EMGMM) with ($k=2$) for generating the initial means, $c0$ and $c_1$. The values used for $\alpha \in [1, 10, 20, 30, 40, 45, 50]$ and the values used for $\lambda_1 \in [50, 100, 150, 200, 400, 800]$. The remaining parameters were calculated from $\mu$, $\alpha$ and $\lambda_1$.
+Since the curves energy functions, $E^i(0)$ and $E^i(1)$, can be tuned relative to a fixed value for $\mu$, which would not impact significantly on the range of possible solution sets, we set $\mu=1$ in all our manual parameter tuning. We use a stopping criterion of $\epsilon=1\times10^{-3}$. We compared the effect of using Otsu binarization, K-means ($k=2$) and Expectation-Maximisation for Gaussian Mixture Modelling (EMGMM) with ($k=2$) for generating the initial means, $c0$ and $c_1$. The values used for $\alpha \in [1, 10, 20, 30, 40, 45, 50]$ and the values used for $\lambda_1 \in [50, 100, 150, 200, 400, 800]$. The remaining parameters were calculated from $\mu$, $\alpha$ and $\lambda_1$.
 
 As final results we take the means of the final segmentation for the background and foreground regions. An acceptable solution was one that achieved at least $70\%$ of the final means from the ground truth for each region. From the acceptable results, we calculate the values for $p_e$, \Cref{eq:pe}, and $h$, \Cref{eq:h}.
 The means for each image can vary greatly.
@@ -915,23 +923,23 @@ Similarly, to determine $h$ we find the average of all $k_h$ for all acceptable 
 \end{equation*}
 An appropriate value for $\lambda_1$ depends on $c_0$ and $c_1$, as can be seen in \Cref{eq:lambda1fromkpandkh}, which can only be determined after the inital means are generated.
 
-\subsection{Parameter Estimation Process}
-We now present the final parameter estimation process. The parameters whose values are fixed are
-\begin{enumerate}
-	\item $\mu=1$
-	\item $k_p = 0.154494$
-	\item $k_h = 0.412737$
-	\item $\alpha = 29.9509$
-\end{enumerate}
-We first segment the image to determine the initial $c_0$ and $c_1$. We can then calculate $\lambda_1$ using \Cref{eq:lambda1fromkpandkh}. Finally, we can calculate $\lambda_0$ using \Cref{eq:l0l1dependancy}.
-The remaining parameter is the stopping criterion $\epsilon$ which we set to  $1 \times 10^{-3}$.
+%\subsection{Parameter Estimation Process}
+%We now present the final parameter estimation process. The parameters whose values are fixed are
+%\begin{enumerate}
+%	\item $\mu=1$
+%	\item $k_p = 0.154494$
+%	\item $k_h = 0.412737$
+%	\item $\alpha = 29.9509$
+%\end{enumerate}
+%We first segment the image to determine the initial $c_0$ and $c_1$. We can then calculate $\lambda_1$ using \Cref{eq:lambda1fromkpandkh}. Finally, we can calculate $\lambda_0$ using \Cref{eq:l0l1dependancy}.
+%The remaining parameter is the stopping criterion $\epsilon$ which we set to  $1 \times 10^{-3}$.
 
 \section{Experimental Results}
 \label{sec:Expresults}
 We compare our results to two previously published parameter settings.
-%The first is the parameter settings used El Zehiry \textit{et al.} \citep{ElZehiry2007}, which is where the Chan-Vese Graph Cut technique was first published.
+The first is the parameter settings used El Zehiry \textit{et al.} \cite{ElZehiry2007}, which is where the Chan-Vese Graph Cut technique was first published.
 Their results showed excellent segmentation output on synthetic images and mammography images with very high robustness against noise. They do not specify the noise type.
-%The second parameter setting which we compete against is presented by Masaka \textit{et al.} \citep{Maska2013}.
+The second parameter setting which we compete against is presented by Masaka \textit{et al.} \cite{Maska2013}.
 Their parameter setting was based on a time-lapse series of fluorescence images. Their scheme is a hybrid of algorithms designed to segment whole fluorescent cells; however, we use the parameter setting they have presented for segmentation only. Their parameter setting was obtained by minimising the Jaccard coefficient over the time-lapse series.
 %Their results show a greater area of cell detection and smoother boundaries; although, the smoother contours are a result of CED-ORI \citep{Weickert2002} which is part of the scheme before segmentation.
 
@@ -1565,13 +1573,19 @@ The relationship formulae only take into account the infomation from the intensi
 % <OR> manually copy in the resultant .bbl file
 % set second argument of \begin to the number of references
 % (used to reserve space for the reference number labels box)
-\begin{thebibliography}{1}
-
-\bibitem{IEEEhowto:kopka}
-H.~Kopka and P.~W. Daly, \emph{A Guide to \LaTeX}, 3rd~ed.\hskip 1em plus
-  0.5em minus 0.4em\relax Harlow, England: Addison-Wesley, 1999.
-
-\end{thebibliography}
+%\begin{thebibliography}{1}
+%
+%\bibitem{IEEEhowto:kopka}
+%H.~Kopka and P.~W. Daly, \emph{A Guide to \LaTeX}, 3rd~ed.\hskip 1em plus
+%  0.5em minus 0.4em\relax Harlow, England: Addison-Wesley, 1999.
+%  
+%\bibitem{ElZehiry2007}
+%El Zehiry, Noha and Xu, Steve and Sahoo, Prasanna and Elmaghraby, Adel, 
+%\emph{Graph Cut Optimization for the Mumford-Shah Model}, 3rd~ed.\hskip 1em plus
+%0.5em minus 0.4em\relax Harlow, England: Addison-Wesley, 1999.
+%
+%\end{thebibliography}
+\bibliography{references}
 
 % biography section
 % 
